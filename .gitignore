@@ -1,4 +1,4 @@
-./output/
+output/
 *.pt
 
 __pycache__/
