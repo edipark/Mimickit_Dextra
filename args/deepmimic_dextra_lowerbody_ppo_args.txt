@@ -1,0 +1,7 @@
+--num_envs 4096
+
+--env_config data/envs/deepmimic_dextra_lowerbody_env.yaml
+--agent_config data/agents/deepmimic_dextra_lowerbody_ppo_agent.yaml
+
+--log_file output/dextra_log.txt
+--out_model_file output/dextra_model.pt
