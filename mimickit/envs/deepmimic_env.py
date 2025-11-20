@@ -712,7 +712,6 @@ def compute_deepmimic_obs(root_pos, root_rot, root_vel, root_ang_vel, joint_rot,
         obs.append(tar_obs)
 
     obs = torch.cat(obs, dim=-1)
-    
     return obs
 
 @torch.jit.script

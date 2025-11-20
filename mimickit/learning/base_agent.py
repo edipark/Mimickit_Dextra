@@ -310,9 +310,14 @@ class BaseAgent(torch.nn.Module):
             # this is mitigate bias in the return estimate towards shorter episodes
             min_eps_per_env = int(np.ceil(num_episodes / num_envs))
 
+
+            action_list = []
+            obs_list = []
             while True:
                 action, action_info = self._decide_action(self._curr_obs, self._curr_info)
-
+                action_list.append(action)
+                obs_list.append(self._curr_obs)
+                
                 next_obs, r, done, next_info = self._step_env(action)
                 self._test_return_tracker.update(r, done)
             
@@ -327,7 +332,9 @@ class BaseAgent(torch.nn.Module):
             test_info = {
                 "mean_return": test_return.item(),
                 "mean_ep_len": test_ep_len.item(),
-                "num_eps": self._test_return_tracker.get_episodes()
+                "num_eps": self._test_return_tracker.get_episodes(),
+                "action_list": action_list,
+                "obs_list": obs_list
             }
         return test_info
 
