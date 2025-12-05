@@ -41,8 +41,8 @@ Dextra is a humanoid robot with a focus on lower body locomotion. This project u
 
 2. **Install Python Packages**
    ```bash
-pip install -r requirements.txt
-```
+   pip install -r requirements.txt
+   ```
 
 3. **Assets and Motion Data**
    - Dextra robot model and mesh files are located in `data/assets/Dextra_lowerbody/`
