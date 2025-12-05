@@ -2,6 +2,32 @@
 
 A reinforcement learning framework for motion imitation of the Dextra robot. This project uses the DeepMimic algorithm to train walking motion controllers for the Dextra robot's lower body.
 
+## Video Demonstration
+
+### Reference Motion
+The reference walking motion used for training:
+
+[📹 Download Motion File](images/MotionFile.mp4)
+
+### Simulation Results
+Trained policy running in simulation:
+
+[📹 Download Simulation Video](images/Sim.mp4)
+
+### Real-World Deployment
+Policy deployed on the actual Dextra robot:
+
+[📹 Download Real-World Deployment Video](images/RealWorldDeploy.mov)
+
+*Note: Click the links above to view/download the videos. For better viewing experience in the README, consider uploading to YouTube/Vimeo and embedding the links below:*
+
+<!-- 
+YouTube/Vimeo links (if available):
+- Reference Motion: [YouTube Link]
+- Simulation: [YouTube Link]  
+- Real-World: [YouTube Link]
+-->
+
 ## Overview
 
 This project is based on the MimicKit framework and focuses on learning walking motion for the Dextra robot's lower body. It uses DeepMimic and PPO algorithms to learn control policies that imitate reference motions.
