@@ -25,31 +25,31 @@
     <geom type="mesh" group="0" mesh="base_link"/>
       <body name="L_HipYaw_Link_1" pos="0.015 0.03755 -0.03694">
         <inertial pos="-0.000221103 9.1293e-07 -0.0123156" quat="0.5 0.5 0.5 0.5" mass="0.00826277" diaginertia="4e-06 3e-06 1e-06"/>
-        <joint name="L_HipYaw_Joint" pos="0 0 0" axis="0 0 1" limited="true" range="-0.7854 0.7854" stiffness="10" damping="3" armature="0.00054"/>
+        <joint name="L_HipYaw_Joint" pos="0 0 0" axis="0 0 1" limited="true" range="-0.7854 0.7854" stiffness="30" damping="3" armature="0.00054"/>
         <geom pos="-0.015 -0.03755 0.03694" contype="0" conaffinity="0" group="1" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="L_HipYaw_Link_1"/>
         <body name="L_HipRoll_Link_1" pos="-0.024 4e-06 -0.030366">
           <inertial pos="0.036984 0.016427 0.028692 " quat="0.509544 0.479923 0.488498 0.520969" mass="0.104913" diaginertia="0.0001522 0.0003199 0.0002422"/>
-          <joint name="L_HipRoll_Joint" pos="0 0 0" axis="1 0 0" limited="true" range="-0.7854 0.7854" stiffness="10" damping="3" armature="0.00054"/>
+          <joint name="L_HipRoll_Joint" pos="0 0 0" axis="1 0 0" limited="true" range="-0.7854 0.7854" stiffness="30" damping="3" armature="0.00054"/>
           <geom pos="0.009 -0.037554 0.067306" group="0" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="L_HipRoll_Link_1"/>
           <geom pos="0.009 -0.037554 0.067306" contype="0" conaffinity="0" group="1" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="L_HipRoll_Link_1"/>
           <body name="L_Thigh_Link_1" pos="0.0237 0.02094 0">
             <inertial pos="-0.000744 0.000007 -0.026753" quat="0.999841 -0.0178259 0 0" mass="0.060348" diaginertia="0.00009725035 0.000089807426 0.000014242969"/>
-            <joint name="L_Thigh_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.7854 0.7854" stiffness="10" damping="3" armature="0.00054"/>
+            <joint name="L_Thigh_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.7854 0.7854" stiffness="30" damping="3" armature="0.00054"/>
             <geom pos="-0.0147 -0.058494 0.067306" group="0" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="L_Thigh_Link_1"/>
             <geom pos="-0.0147 -0.058494 0.067306" contype="0" conaffinity="0" group="1" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="L_Thigh_Link_1"/>            
             <body name="L_Calf_Link_1" pos="-0.000421 -0.04194 -0.095807">
               <inertial pos="0.00910366 0.0210003 -0.0408459" quat="0.998332 0 0.0577405 0" mass="0.0236038" diaginertia="3.02321e-05 2.3e-05 1.27679e-05"/>
-              <joint name="L_Calf_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.7854 0.7854" stiffness="10" damping="3" armature="0.00054"/>
+              <joint name="L_Calf_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.7854 0.7854" stiffness="30" damping="3" armature="0.00054"/>
               <geom pos="-0.014279 -0.016554 0.163113" group="0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="L_Calf_Link_1"/>
               <geom pos="-0.014279 -0.016554 0.163113" contype="0" conaffinity="0" group="1" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="L_Calf_Link_1"/>
               <body name="L_AnklePitch_Link_1" pos="0 0.042 -0.093">
                 <inertial pos="0.024483 -0.015323 -0.025693" quat="0.479923 0.509544 0.520969 0.488498" mass="0.104906" diaginertia="0.00003749119 0.000090057668 0.000070374364"/>
-                <joint name="L_AnklePitch_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.7854 0.7854" stiffness="10" damping="3" armature="0.00054"/>
+                <joint name="L_AnklePitch_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.7854 0.7854" stiffness="30" damping="3" armature="0.00054"/>
                 <geom pos="-0.014279 -0.058554 0.256113" group="0" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="L_AnklePitch_Link_1"/>
                 <geom pos="-0.014279 -0.058554 0.256113" contype="0" conaffinity="0" group="1" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="L_AnklePitch_Link_1"/>
                 <body name="L_AnkleRoll_Link_1" pos="-0.0237 -0.02094 0">
                   <inertial pos="0.0387982 0.00540208 -0.0253465" quat="0.0328712 0.72177 0.0931947 0.685042" mass="0.0263339" diaginertia="2.72276e-05 2.19127e-05 8.85979e-06"/>
-                  <joint name="L_AnkleRoll_Joint" pos="0 0 0" axis="1 0 0" limited="true" range="-0.7854 0.7854" stiffness="10" damping="3" armature="0.00054"/>
+                  <joint name="L_AnkleRoll_Joint" pos="0 0 0" axis="1 0 0" limited="true" range="-0.7854 0.7854" stiffness="30" damping="3" armature="0.00054"/>
                   <geom pos="0.009421 -0.037614 0.256113" contype="0" conaffinity="0" group="1" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="L_AnkleRoll_Link_1"/>
                   <geom pos="0.04355 0.007614 -0.028884" group="2" quat="1 0 0 0" type="box" size="0.05 0.0325 0.0015" rgba="0 0 0 0"/>
                 </body>
@@ -60,31 +60,31 @@
       </body>
       <body name="R_HipYaw_Link_1" pos="0.014982 -0.03755 -0.03694">
         <inertial pos="-0.000220986 9.1293e-07 -0.0123156" quat="0.5 0.5 0.5 0.5" mass="0.00826277" diaginertia="4e-06 3e-06 1e-06"/>
-        <joint name="R_HipYaw_Joint" pos="0 0 0" axis="0 0 1" limited="true" range="-0.7854 0.7854" stiffness="10" damping="3" armature="0.00054"/>
+        <joint name="R_HipYaw_Joint" pos="0 0 0" axis="0 0 1" limited="true" range="-0.7854 0.7854" stiffness="30" damping="3" armature="0.00054"/>
         <geom pos="-0.014982 0.03755 0.03694" contype="0" conaffinity="0" group="1" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="R_HipYaw_Link_1"/>
         <body name="R_HipRoll_Link_1" pos="-0.024 4e-06 -0.030366">
           <inertial pos="0.036984 -0.016427 0.028692 " quat="0.509544 0.479923 0.488498 0.520969" mass="0.104913" diaginertia="0.0001522 0.0003199 0.0002422"/>
-          <joint name="R_HipRoll_Joint" pos="0 0 0" axis="1 0 0" limited="true" range="-0.7854 0.7854" stiffness="10" damping="3" armature="0.00054"/>
+          <joint name="R_HipRoll_Joint" pos="0 0 0" axis="1 0 0" limited="true" range="-0.7854 0.7854" stiffness="30" damping="3" armature="0.00054"/>
           <geom pos="0.009018 0.037546 0.067306" group="0" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="R_HipRoll_Link_1"/>
           <geom pos="0.009018 0.037546 0.067306" contype="0" conaffinity="0" group="1" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="R_HipRoll_Link_1"/>
           <body name="R_Thigh_Link_1" pos="0.0237 -0.02094 0">
             <inertial pos="-0.000744 -0.000007 -0.026753" quat="0.999841 -0.0178259 0 0" mass="0.060348" diaginertia="0.00009725035 0.000089807426 0.000014242969"/>
-            <joint name="R_Thigh_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.7854 0.7854" stiffness="10" damping="3" armature="0.00054"/>
+            <joint name="R_Thigh_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.7854 0.7854" stiffness="30" damping="3" armature="0.00054"/>
             <geom pos="-0.014682 0.058486 0.067306" group="0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="R_Thigh_Link_1"/>
             <geom pos="-0.014682 0.058486 0.067306" contype="0" conaffinity="0" group="1" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="R_Thigh_Link_1"/>
             <body name="R_Calf_Link_1" pos="-0.000421 0.04194 -0.095807">
                 <inertial pos="0.024483 0.015323 -0.025693" quat="0.479923 0.509544 0.520969 0.488498" mass="0.104906" diaginertia="0.00003749119 0.000090057668 0.000070374364"/>
-              <joint name="R_Calf_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.7854 0.7854" stiffness="10" damping="3" armature="0.00054"/>
+              <joint name="R_Calf_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.7854 0.7854" stiffness="30" damping="3" armature="0.00054"/>
               <geom pos="-0.014261 0.016546 0.163113" group="0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="R_Calf_Link_1"/>
               <geom pos="-0.014261 0.016546 0.163113" contype="0" conaffinity="0" group="1" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="R_Calf_Link_1"/>
               <body name="R_AnklePitch_Link_1" pos="0 -0.042 -0.093">
                 <inertial pos="-0.0204291 0.0204934 0.0160378" quat="0.488498 0.520969 0.509544 0.479923" mass="0.100895" diaginertia="8.50201e-05 6.71243e-05 3.48556e-05"/>
-                <joint name="R_AnklePitch_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.7854 0.7854" stiffness="10" damping="3" armature="0.00054"/>
+                <joint name="R_AnklePitch_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="-0.7854 0.7854" stiffness="30" damping="3" armature="0.00054"/>
                 <geom pos="-0.014261 0.058546 0.256113" group="0" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="R_AnklePitch_Link_1"/>
                 <geom pos="-0.014261 0.058546 0.256113" contype="0" conaffinity="0" group="1" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="R_AnklePitch_Link_1"/>
                 <body name="R_AnkleRoll_Link_1" pos="-0.0237 0.02094 -1.8e-05">
                   <inertial pos="0.0387983 -0.00540153 -0.0253464" quat="-0.0328712 0.72177 -0.0931947 0.685042" mass="0.0263339" diaginertia="2.72276e-05 2.19127e-05 8.85979e-06"/>
-                  <joint name="R_AnkleRoll_Joint" pos="0 0 0" axis="1 0 0" limited="true" range="-0.7854 0.7854" stiffness="10" damping="3" armature="0.00054"/>
+                  <joint name="R_AnkleRoll_Joint" pos="0 0 0" axis="1 0 0" limited="true" range="-0.7854 0.7854" stiffness="30" damping="3" armature="0.00054"/>
                   <geom pos="0.009439 0.037606 0.256131" contype="0" conaffinity="0" group="1" quat="1 0 0 0" rgba="0.2 0.2 0.2 1" type="mesh" mesh="R_AnkleRoll_Link_1"/>
                   <geom pos="0.04355 -0.007614 -0.028884" group="2" quat="1 0 0 0" type="box" size="0.05 0.0325 0.0015" rgba="0 0 0 0"/>
                 </body>

@@ -1,5 +1,18 @@
+# Ignore output directory by default
 output/
+
+# Allow specific files in flat_foot_improved directory (must come after output/)
+!output/flat_foot_improved/
+!output/flat_foot_improved/model.pt
+!output/flat_foot_improved/agent_config.yaml
+!output/flat_foot_improved/env_config.yaml
+!output/flat_foot_improved/dextra_log.txt
+!output/flat_foot_improved/events.out.tfevents.*
+
+# Ignore all other .pt files (model checkpoints)
 *.pt
+# Ignore intermediate checkpoint files (model_XXXXXX.pt)
+**/model_*.pt
 
 __pycache__/
 *.pyc

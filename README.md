@@ -1,198 +1,292 @@
-# MimicKit
+# Dextra Robot Motion Imitation
 
+A reinforcement learning framework for motion imitation of the Dextra robot. This project uses the DeepMimic algorithm to train walking motion controllers for the Dextra robot's lower body.
 
-![Teaser](images/MimicKit_teaser.gif)
+## Overview
 
-This framework provides a suite of motion imitation methods for training motion controllers. This codebase is designed to be clean and lightweight, with minimal dependencies. A more detailed overview of MimicKit is available in the [Starter Guide](https://arxiv.org/abs/2510.13794). This codebase includes implementations of:
-- [DeepMimic](https://xbpeng.github.io/projects/DeepMimic/index.html)
-- [AMP](https://xbpeng.github.io/projects/AMP/index.html)
-- [ASE](https://xbpeng.github.io/projects/ASE/index.html)
-- [ADD](https://xbpeng.github.io/projects/ADD/index.html)
+This project is based on the MimicKit framework and focuses on learning walking motion for the Dextra robot's lower body. It uses DeepMimic and PPO algorithms to learn control policies that imitate reference motions.
 
-We also include the following RL algorithms:
-- [PPO](https://arxiv.org/abs/1707.06347)
-- [AWR](https://xbpeng.github.io/projects/AWR/index.html)
+## Dextra Robot
 
----
+Dextra is a humanoid robot with a focus on lower body locomotion. This project uses Dextra's lower body (`Dextra_lowerbody`) to learn walking motions.
+
+### Robot Structure
+- **Robot File**: `data/assets/Dextra_lowerbody/Dextra_lowerbody.xml`
+- **Key Joints**: Hip, knee, and ankle joints (left and right)
+- **DOF**: 12 DOF (lower body)
 
 ## Installation
 
-Install IsaacGym: https://developer.nvidia.com/isaac-gym
+### Requirements
 
-Install requirements:
-```
+1. **Install IsaacGym**
+   - Install NVIDIA IsaacGym: https://developer.nvidia.com/isaac-gym
+
+2. **Install Python Packages**
+   ```bash
 pip install -r requirements.txt
 ```
-Download assets and motion data from [here](https://1sfu-my.sharepoint.com/:u:/g/personal/xbpeng_sfu_ca/EclKq9pwdOBAl-17SogfMW0Bved4sodZBQ_5eZCiz9O--w?e=bqXBaa), then extract the contents into [`data/`](data/).
 
----
+3. **Assets and Motion Data**
+   - Dextra robot model and mesh files are located in `data/assets/Dextra_lowerbody/`
+   - Walking motion data is available in `data/motions/dextra_walking.pkl`
 
 ## Training
 
-To train a model, run the following command:
-```
-python mimickit/run.py --mode train --num_envs 4096 --env_config data/envs/deepmimic_humanoid_env.yaml --agent_config data/agents/deepmimic_humanoid_ppo_agent.yaml --visualize true --log_file output/log.txt --out_model_file output/model.pt
-```
-- `--mode` selects either `train` or `test` mode.
-- `--num_envs` specifies the number of parallel environments used for simulation.
-- `--env_config` specifies the configuration file for the environment.
-- `--agent_config` specifies configuration file for the agent.
-- `--visualize` enables visualization. Rendering should be disabled for faster training.
-- `--log_file` specifies the output log file, which will keep track of statistics during training.
-- `--out_model_file` specifies the output model file, which contains the model parameters.
-- `--logger` specifies the logger used to record training stats. The options are TensorBoard `tb` or `wandb`.
+### How to Train a Policy
 
-Instead of specifying all arguments through the command line, arguments can also be loaded from an `arg_file`:
+The training process uses DeepMimic with PPO to learn a walking policy for the Dextra robot. The agent learns to imitate a reference motion by maximizing rewards based on pose similarity, velocity matching, and root position tracking.
+
+#### Step 1: Basic Training
+
+Start training with default settings:
+```bash
+python mimickit/run.py \
+    --mode train \
+    --num_envs 4096 \
+    --env_config data/envs/deepmimic_dextra_lowerbody_env.yaml \
+    --agent_config data/agents/deepmimic_dextra_lowerbody_ppo_agent.yaml \
+    --visualize false \
+    --log_file output/log.txt \
+    --out_model_file output/model.pt
 ```
-python mimickit/run.py --arg_file args/deepmimic_humanoid_ppo_args.txt --visualize true
+
+Or use a pre-configured argument file:
+```bash
+python mimickit/run.py \
+    --arg_file args/deepmimic_dextra_lowerbody_ppo_args.txt \
+    --visualize false
 ```
-The arguments in `arg_file` are treated the same as command line arguments. Arguments for all algorithms are provided in [`args/`](args/).
 
+#### Step 2: Training Process
 
-## Testing
+During training, the system will:
+1. Initialize 4096 parallel simulation environments
+2. Collect experience using the current policy
+3. Update the policy using PPO algorithm every 32 steps
+4. Save model checkpoints periodically (every 500 iterations by default)
+5. Log training statistics to `log.txt` and TensorBoard
 
-To test a model, run the following command:
+#### Step 3: Monitor Training
+
+Watch training progress in real-time:
+```bash
+# In another terminal, start TensorBoard
+tensorboard --logdir=output/ --port=6006
 ```
-python mimickit/run.py --arg_file args/deepmimic_humanoid_ppo_args.txt --num_envs 4 --visualize true --mode test --model_file data/models/deepmimic_humanoid_spinkick_model.pt
+
+Or view the log file:
+```bash
+tail -f output/log.txt
 ```
-- `--model_file` specifies the `.pt` file that contains the parameters of the trained model. Pretrained models are available in [`data/models/`](data/models/), and the corresponding training log files are available in [`data/logs/`](data/logs/).
 
+#### Step 4: Training Parameters
 
-## Distributed Training
+Key training parameters you can adjust:
 
-To use distributed training with multi-CPU or multi-GPU:
+**Environment Parameters** (`data/envs/deepmimic_dextra_lowerbody_env.yaml`):
+- `motion_file`: Reference motion file (`dextra_walking.pkl` or `dextra_walking_improved.pkl`)
+- `episode_length`: Episode duration in seconds (default: 5.0)
+- `reward_pose_w`: Weight for pose matching reward (default: 0.5)
+- `reward_vel_w`: Weight for velocity matching reward (default: 0.1)
+- `reward_root_pose_w`: Weight for root position reward (default: 0.15)
+
+**Agent Parameters** (`data/agents/deepmimic_dextra_lowerbody_ppo_agent.yaml`):
+- `learning_rate`: PPO learning rate (default: 5e-5)
+- `batch_size`: Batch size for policy updates (default: 4)
+- `update_epochs`: Number of update epochs per iteration (default: 5)
+- `ppo_clip_ratio`: PPO clipping ratio (default: 0.2)
+
+**Command Line Parameters**:
+- `--num_envs`: Number of parallel environments (more = faster training, default: 4096)
+- `--max_samples`: Maximum training samples (default: unlimited)
+- `--visualize`: Enable visualization (`false` recommended for training)
+- `--logger`: Choose `tb` (TensorBoard) or `wandb` for logging
+
+#### Step 5: Save and Resume Training
+
+Models are automatically saved:
+- Final model: `output/model.pt`
+- Checkpoints: `output/model_0000000500.pt`, `output/model_0000001000.pt`, etc.
+
+To resume training from a checkpoint:
+```bash
+python mimickit/run.py \
+    --arg_file args/deepmimic_dextra_lowerbody_ppo_args.txt \
+    --model_file output/model_0000005000.pt \
+    --mode train
 ```
-python mimickit/run.py --arg_file args/deepmimic_humanoid_ppo_args.txt --num_workers 2 --device cuda:0
-```
-- `--num_workers` specifies the number of worker processes used to parallelize training. 
-- `--device` specifies the device used for training, which can be `cpu` or `cuda:0`. When training with multiple GPUs, the number of worker processes used to parallelize training must be less than or equal to the number of GPUs available on the system.
 
-## Visualizing Training Logs
+## Running a Trained Policy
 
-When using the TensorBoard logger during training, a TensorBoard `events` file will be saved in the same output directory as the log file. The log can be viewed with:
-```
-tensorboard --logdir=output/ --port=6006 --samples_per_plugin scalars=999999
-```
-The output log `.txt` file can also be plotted using the plotting script [`plot_log.py`](tools/plot_log/plot_log.py).
+### How to Run a Trained Policy
 
----
+Once you have a trained model, you can run it to see the robot perform the learned walking motion.
+
+#### Using the Pretrained Model
+
+A pretrained model is available in the repository:
+```bash
+python mimickit/run.py \
+    --mode test \
+    --num_envs 4 \
+    --env_config data/envs/deepmimic_dextra_lowerbody_env.yaml \
+    --agent_config data/agents/deepmimic_dextra_lowerbody_ppo_agent.yaml \
+    --visualize true \
+    --model_file output/flat_foot_improved/model.pt
+```
+
+#### Using Your Own Trained Model
+
+If you trained your own model:
+```bash
+python mimickit/run.py \
+--mode test --num_envs 4 \
+--env_config data/envs/deepmimic_dextra_lowerbody_env_improved_motion.yaml \
+--agent_config data/agents/deepmimic_dextra_lowerbody_ppo_agent.yaml \
+--log_file output/{your_output_file}/dextra_log.txt \
+--model_file output/{your_output_file}/model.pt  --visualize true
+```
+
+#### Running Without Visualization
+If you want to execute training with our config...
+```bash
+python mimickit/run.py \
+--mode train --num_envs 4096 \
+--env_config data/envs/deepmimic_dextra_lowerbody_env_improved_motion.yaml \
+--agent_config data/agents/deepmimic_dextra_lowerbody_ppo_agent.yaml --visualize false \
+--log_file output/{your_output_file}/dextra_log.txt \
+--out_model_file output/{your_output_file}/model.pt \
+--int_output_dir output/{your_output_file}
+```
+
+#### Policy Execution Parameters
+
+- `--mode test`: Run in test mode (no training)
+- `--num_envs`: Number of parallel environments (4-8 recommended for visualization, more for evaluation)
+- `--visualize`: Set to `true` to see the robot simulation
+- `--model_file`: Path to the trained model file (`.pt` file)
+- `--test_episodes`: Number of episodes to run (default: unlimited)
+
+#### What to Expect
+
+When running a trained policy, you should see:
+- The Dextra robot performing a walking motion
+- The robot maintaining balance and following the reference motion
+- Episode statistics printed to the console (mean return, episode length, etc.)
+
+The policy will run until you stop it (Ctrl+C) or until the specified number of test episodes is reached.
+
+## Behavioral Cloning (BC)
+
+You can collect data from a trained model and train a BC model using that data.
+
+### 1. Data Collection (Rollout)
+
+```bash
+python mimickit/run_bc.py \
+    --mode rollout \
+    --num_workers 1 \
+    --num_envs 4 \
+    --env_config data/envs/deepmimic_dextra_lowerbody_env.yaml \
+    --agent_config data/agents/deepmimic_dextra_lowerbody_ppo_agent.yaml \
+    --model_file output/model.pt \
+    --rollout_episodes 100 \
+    --rollout_file output/bc_data/rollout_dataset.npz \
+    --visualize false
+```
+
+### 2. BC Model Training
+
+```bash
+python bc/train.py \
+    --data_path output/bc_data/rollout_dataset.npz \
+    --output_dir output/bc_model \
+    --batch_size 64 \
+    --epochs 100 \
+    --lr 1e-3 \
+    --device cuda
+```
+
+For more details, see [`bc/README.md`](bc/README.md).
+
+## Motion Visualization
+
+Visualize reference motion clips:
+```bash
+python mimickit/run.py \
+    --mode test \
+    --arg_file args/view_motion_dextra_lowerbody_args.txt \
+    --visualize true
+```
+
+## Training Log Visualization
+
+### TensorBoard
+```bash
+tensorboard --logdir=output/ --port=6006
+```
+
+### Plot Log File
+```bash
+python tools/plot_log/plot_log.py --log_file output/log.txt
+```
 
 ## Motion Data
-Motion data is stored in [`data/motions/`](data/motions/). The `motion_file` field in the environment configuration file can be used to specify the reference motion clip. In addition to imitating individual motion clips, `motion_file` can also specify a dataset file, located in [`data/datasets/`](data/datasets/), which will train a model to imitate a dataset containing multiple motion clips.
 
-The `view_motion` environment can be used to visualize motion clips:
-```
-python mimickit/run.py --mode test --arg_file args/view_motion_humanoid_args.txt --visualize true
-```
+- **Basic Walking Motion**: `data/motions/dextra_walking.pkl`
+- **Improved Walking Motion**: `data/motions/dextra_walking_improved.pkl`
 
-Motion clips are represented by the `Motion` class implemented in [`motion.py`](mimickit/anim/motion.py). Each motion clip is stored in a `.pkl` file. Each frame in a motion specifies the pose of the character according to
+Motion files are stored in `.pkl` format, where each frame follows the format:
 ```
 [root position (3D), root rotation (3D), joint rotations]
 ```
-where 3D rotations are specified using 3D exponential maps. Joint rotations are recorded in the order that the joints are specified in the `.xml` file (i.e. depth-first traversal of the kinematic tree). For example, in the case of [`humanoid.xml`](data/assets/humanoid/humanoid.xml), each frame is represented as
+
+## Pretrained Models
+
+A pretrained walking policy is available:
+- **Location**: `output/flat_foot_improved/model.pt`
+- **Description**: Trained policy for Dextra lower body walking with improved motion
+- **Usage**: See [Running a Trained Policy](#running-a-trained-policy) section above
+
+## Output Files
+
+After training, the following files are generated in the `output/` directory:
+- `model.pt`: Final trained model parameters
+- `model_XXXXXX.pt`: Checkpoint files saved at regular intervals
+- `log.txt`: Training statistics log (rewards, losses, etc.)
+- `env_config.yaml`: Copy of environment configuration used for training
+- `agent_config.yaml`: Copy of agent configuration used for training
+- `events.out.tfevents.*`: TensorBoard event files (when using TensorBoard logger)
+
+## Project Structure
+
 ```
-[root position (3D), root rotation (3D), abdomen (3D), neck (3D), right_shoulder (3D), right_elbow (1D), left_shoulder (3D), left_elbow (1D), right_hip (3D), right_knee (1D), right_ankle (3D), left_hip (3D), left_knee (1D), left_ankle (3D)]
+MimicKit/
+├── data/
+│   ├── assets/
+│   │   └── Dextra_lowerbody/      # Dextra lower body robot model
+│   ├── envs/
+│   │   └── deepmimic_dextra_lowerbody_env.yaml
+│   ├── agents/
+│   │   └── deepmimic_dextra_lowerbody_ppo_agent.yaml
+│   └── motions/
+│       ├── dextra_walking.pkl
+│       └── dextra_walking_improved.pkl
+├── bc/                              # Behavioral Cloning code
+├── mimickit/                        # Main framework
+├── args/                            # Training configuration files
+└── output/                          # Training results directory
 ```
-The rotations of 3D joints are represented using 3D exponential maps, and the rotations of 1D joints are represented using 1D rotation angles.
 
+## References
 
-## Motion Retargeting
-Motion retargeting can be done using [GMR](https://github.com/YanjieZe/GMR). A script to convert GMR files to the MimicKit format is available in [`tools/gmr_to_mimickit/`](tools/gmr_to_mimickit/).
+- [MimicKit Paper](https://arxiv.org/abs/2510.13794)
+- [DeepMimic](https://xbpeng.github.io/projects/DeepMimic/index.html)
+- [PPO Algorithm](https://arxiv.org/abs/1707.06347)
 
----
+## License
 
-## Citation
-If you find this codebase helpful, please cite:
-```
-@misc{
-      MimicKitPeng2025,
-      title={MimicKit: A Reinforcement Learning Framework for Motion Imitation and Control}, 
-      author={Xue Bin Peng},
-      year={2025},
-      eprint={2510.13794},
-      archivePrefix={arXiv},
-      primaryClass={cs.GR},
-      url={https://arxiv.org/abs/2510.13794}, 
-}
-```
-Please also consider citing the relevant papers:
-```
-@article{
-	2018-TOG-deepMimic,
-	author = {Peng, Xue Bin and Abbeel, Pieter and Levine, Sergey and van de Panne, Michiel},
-	title = {DeepMimic: Example-guided Deep Reinforcement Learning of Physics-based Character Skills},
-	journal = {ACM Trans. Graph.},
-	issue_date = {August 2018},
-	volume = {37},
-	number = {4},
-	month = jul,
-	year = {2018},
-	issn = {0730-0301},
-	pages = {143:1--143:14},
-	articleno = {143},
-	numpages = {14},
-	url = {http://doi.acm.org/10.1145/3197517.3201311},
-	doi = {10.1145/3197517.3201311},
-	acmid = {3201311},
-	publisher = {ACM},
-	address = {New York, NY, USA},
-	keywords = {motion control, physics-based character animation, reinforcement learning},
-}
+This project is based on the [MimicKit](https://arxiv.org/abs/2510.13794) framework by Xue Bin Peng, which is licensed under the Apache License 2.0.
 
-@article{
-	AWRPeng19,
-	author = {Xue Bin Peng and Aviral Kumar and Grace Zhang and Sergey Levine},
-	title = {Advantage-Weighted Regression: Simple and Scalable Off-Policy Reinforcement Learning},
-	journal = {CoRR},
-	volume = {abs/1910.00177},
-	year = {2019},
-	url = {https://arxiv.org/abs/1910.00177},
-	archivePrefix = {arXiv},
-	eprint = {1910.00177},
-	timestamp = {Tue, 01 October 2019 11:27:50 +0200},
-	bibsource = {dblp computer science bibliography, https://dblp.org}
-}
-
-@article{
-	2021-TOG-AMP,
-	author = {Peng, Xue Bin and Ma, Ze and Abbeel, Pieter and Levine, Sergey and Kanazawa, Angjoo},
-	title = {AMP: Adversarial Motion Priors for Stylized Physics-Based Character Control},
-	journal = {ACM Trans. Graph.},
-	issue_date = {August 2021},
-	volume = {40},
-	number = {4},
-	month = jul,
-	year = {2021},
-	articleno = {1},
-	numpages = {15},
-	url = {http://doi.acm.org/10.1145/3450626.3459670},
-	doi = {10.1145/3450626.3459670},
-	publisher = {ACM},
-	address = {New York, NY, USA},
-	keywords = {motion control, physics-based character animation, reinforcement learning},
-}
-
-@article{
-	2022-TOG-ASE,
-	author = {Peng, Xue Bin and Guo, Yunrong and Halper, Lina and Levine, Sergey and Fidler, Sanja},
-	title = {ASE: Large-scale Reusable Adversarial Skill Embeddings for Physically Simulated Characters},
-	journal = {ACM Trans. Graph.},
-	issue_date = {August 2022},
-	volume = {41},
-	number = {4},
-	month = jul,
-	year = {2022},
-	articleno = {94},
-	publisher = {ACM},
-	address = {New York, NY, USA},
-	keywords = {motion control, physics-based character animation, reinforcement learning}
-}
-
-@inproceedings{
-    zhang2025ADD,
-    author={Zhang, Ziyu and Bashkirov, Sergey and Yang, Dun and Shi, Yi and Taylor, Michael and Peng, Xue Bin},
-    title = {Physics-Based Motion Imitation with Adversarial Differential Discriminators},
-    year = {2025},
-    booktitle = {SIGGRAPH Asia 2025 Conference Papers (SIGGRAPH Asia '25 Conference Papers)}
-}
-```
+This project is also licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
