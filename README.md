@@ -1,4 +1,4 @@
-# Dextra Robot Motion Imitation
+# Dextra Motion Imitation
 
 A reinforcement learning framework for motion imitation of the Dextra robot. This project uses the DeepMimic algorithm to train walking motion controllers for the Dextra robot's lower body.
 
