@@ -7,26 +7,17 @@ A reinforcement learning framework for motion imitation of the Dextra robot. Thi
 ### Reference Motion
 The reference walking motion used for training:
 
-[📹 Download Motion File](images/MotionFile.mp4)
+![Reference Motion](images/MotionFile.gif)
 
 ### Simulation Results
-Trained policy running in simulation:
+Trained policy running in Isaac Gym simulation:
 
-[📹 Download Simulation Video](images/Sim.mp4)
+![Isaac Gym Simulation](images/IsaacGym.gif)
 
-### Real-World Deployment
-Policy deployed on the actual Dextra robot:
+### Sim-to-Real Transfer
+Policy transferred from simulation to real-world deployment:
 
-[📹 Download Real-World Deployment Video](images/RealWorldDeploy.mov)
-
-*Note: Click the links above to view/download the videos. For better viewing experience in the README, consider uploading to YouTube/Vimeo and embedding the links below:*
-
-<!-- 
-YouTube/Vimeo links (if available):
-- Reference Motion: [YouTube Link]
-- Simulation: [YouTube Link]  
-- Real-World: [YouTube Link]
--->
+[📹 Download Sim-to-Real Video](images/Sim-to-Real.mp4)
 
 ## Overview
 
