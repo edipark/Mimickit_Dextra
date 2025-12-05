@@ -57,3 +57,4 @@ class BCNetwork(nn.Module):
         """
         return self.network(x)
 
+

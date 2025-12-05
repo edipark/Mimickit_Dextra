@@ -35,12 +35,14 @@ env:
     reward_root_pose_w: 0.15
     reward_root_vel_w: 0.1
     reward_key_pos_w: 0.15
+    reward_foot_orient_w: 0.1
 
     reward_pose_scale: 0.25
     reward_vel_scale: 0.01
     reward_root_pose_scale: 5.0
     reward_root_vel_scale: 1.0
-    reward_key_pos_scale: 10.0
+    reward_key_pos_scale: 7.5
+    reward_foot_orient_scale: 2.0
 
 
 engine:

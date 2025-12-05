@@ -122,6 +122,12 @@ def main():
     print(f"Loading dataset from: {args.data_path}")
     full_dataset = BCDataset(args.data_path)
     
+    # Get input and output dimensions from dataset
+    input_dim = full_dataset.inputs.shape[1]
+    output_dim = full_dataset.outputs.shape[1]
+    
+    print(f"Detected input_dim: {input_dim}, output_dim: {output_dim}")
+    
     # Split dataset into train and validation
     dataset_size = len(full_dataset)
     val_size = int(args.val_split * dataset_size)
@@ -151,10 +157,10 @@ def main():
         pin_memory=True if device.type == 'cuda' else False
     )
     
-    # Create model
+    # Create model with detected dimensions
     model = BCNetwork(
-        input_dim=72,
-        output_dim=12,
+        input_dim=input_dim,
+        output_dim=output_dim,
         hidden_dims=args.hidden_dims
     ).to(device)
     
@@ -268,4 +274,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 

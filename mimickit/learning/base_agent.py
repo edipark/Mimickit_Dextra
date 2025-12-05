@@ -313,12 +313,22 @@ class BaseAgent(torch.nn.Module):
 
             action_list = []
             obs_list = []
+            action_list_eps = []
+            obs_list_eps = []
             while True:
                 action, action_info = self._decide_action(self._curr_obs, self._curr_info)
-                action_list.append(action)
-                obs_list.append(self._curr_obs)
+                action_list_eps.append(action)
+                obs_list_eps.append(self._curr_obs)
                 
                 next_obs, r, done, next_info = self._step_env(action)
+
+                if done:
+                    if len(action_list_eps) >= 150:
+                        action_list.append(action_list_eps)
+                        obs_list.append(obs_list_eps)
+                    action_list_eps = []
+                    obs_list_eps = []
+
                 self._test_return_tracker.update(r, done)
             
                 self._curr_obs, self._curr_info = self._reset_done_envs(done)

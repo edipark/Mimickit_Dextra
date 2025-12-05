@@ -39,6 +39,9 @@ class DeepMimicEnv(char_env.CharEnv):
         self._reward_root_vel_scale = env_config.get("reward_root_vel_scale")
         self._reward_key_pos_scale = env_config.get("reward_key_pos_scale")
         
+        self._reward_foot_orient_w = env_config.get("reward_foot_orient_w", 0.0)
+        self._reward_foot_orient_scale = env_config.get("reward_foot_orient_scale", 1.0)
+        
         self._visualize_ref_char = env_config.get("visualize_ref_char", True)
         
         super().__init__(config=config, num_envs=num_envs, device=device,
@@ -398,6 +401,7 @@ class DeepMimicEnv(char_env.CharEnv):
         dof_pos = self._engine.get_dof_pos(char_id)
         dof_vel = self._engine.get_dof_vel(char_id)
         body_pos = self._engine.get_body_pos(char_id)
+        body_rot = self._engine.get_body_rot(char_id)
         
         joint_rot = self._kin_char_model.dof_to_rot(dof_pos)
         if (self._has_key_bodies()):
@@ -406,6 +410,12 @@ class DeepMimicEnv(char_env.CharEnv):
         else:
             key_pos = torch.zeros([0], device=self._device)
             ref_key_pos = key_pos
+
+        # Get foot rotations if contact bodies are defined
+        if (self._contact_body_ids.shape[0] > 0):
+            foot_rot = body_rot[..., self._contact_body_ids, :]
+        else:
+            foot_rot = torch.zeros([0], device=self._device)
 
         track_root_h = self._root_height_obs
         track_root = self._track_global_root()
@@ -417,6 +427,7 @@ class DeepMimicEnv(char_env.CharEnv):
                                              joint_rot=joint_rot,
                                              dof_vel=dof_vel,
                                              key_pos=key_pos,
+                                             foot_rot=foot_rot,
                                              
                                              tar_root_pos=self._ref_root_pos,
                                              tar_root_rot=self._ref_root_rot,
@@ -436,12 +447,14 @@ class DeepMimicEnv(char_env.CharEnv):
                                              root_pose_w=self._reward_root_pose_w,
                                              root_vel_w=self._reward_root_vel_w,
                                              key_pos_w=self._reward_key_pos_w,
+                                             foot_orient_w=self._reward_foot_orient_w,
 
                                              pose_scale=self._reward_pose_scale,
                                              vel_scale=self._reward_vel_scale,
                                              root_pose_scale=self._reward_root_pose_scale,
                                              root_vel_scale=self._reward_root_vel_scale,
-                                             key_pos_scale=self._reward_key_pos_scale)
+                                             key_pos_scale=self._reward_key_pos_scale,
+                                             foot_orient_scale=self._reward_foot_orient_scale)
         return
 
     def _update_done(self):
@@ -797,13 +810,13 @@ def compute_done(done_buf, time, ep_len, root_rot, body_pos, tar_root_rot, tar_b
     return done
 
 @torch.jit.script
-def compute_reward(root_pos, root_rot, root_vel, root_ang_vel, joint_rot, dof_vel, key_pos,
+def compute_reward(root_pos, root_rot, root_vel, root_ang_vel, joint_rot, dof_vel, key_pos, foot_rot,
                    tar_root_pos, tar_root_rot, tar_root_vel, tar_root_ang_vel,
                    tar_joint_rot, tar_dof_vel, tar_key_pos,
                    joint_rot_err_w, dof_err_w, track_root_h, track_root,
-                   pose_w, vel_w, root_pose_w, root_vel_w, key_pos_w,
-                   pose_scale, vel_scale, root_pose_scale, root_vel_scale, key_pos_scale):
-    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, bool, bool, float, float, float, float, float, float, float, float, float, float) -> Tensor
+                   pose_w, vel_w, root_pose_w, root_vel_w, key_pos_w, foot_orient_w,
+                   pose_scale, vel_scale, root_pose_scale, root_vel_scale, key_pos_scale, foot_orient_scale):
+    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, bool, bool, float, float, float, float, float, float, float, float, float, float, float, float) -> Tensor
     pose_diff = torch_util.quat_diff_angle(joint_rot, tar_joint_rot)
     pose_err = torch.sum(joint_rot_err_w * pose_diff * pose_diff, dim=-1)
 
@@ -850,11 +863,58 @@ def compute_reward(root_pos, root_rot, root_vel, root_ang_vel, joint_rot, dof_ve
     root_vel_r = torch.exp(-root_vel_scale * (root_vel_err + 0.1 * root_ang_vel_err))
     key_pos_r = torch.exp(-key_pos_scale * key_pos_err)
 
+    # Compute foot orientation penalty
+    foot_orient_r = torch.ones_like(root_pos[..., 0])
+    if (foot_orient_w > 0.0 and len(foot_rot) > 0 and foot_rot.shape[-2] > 0):
+        # Foot z-axis in local frame is [0, 0, 1]
+        # Create z-axis vector for each foot: [..., num_feet, 3]
+        # JIT-compatible: explicitly specify shape dimensions
+        num_feet = foot_rot.shape[-2]
+        if len(foot_rot.shape) == 3:
+            # [num_envs, num_feet, 4] -> [num_envs, num_feet, 3]
+            num_envs = foot_rot.shape[0]
+            foot_z_axis_local = torch.zeros(num_envs, num_feet, 3, device=foot_rot.device, dtype=foot_rot.dtype)
+        else:
+            # [num_envs, num_frames, num_feet, 4] -> [num_envs, num_frames, num_feet, 3]
+            num_envs = foot_rot.shape[0]
+            num_frames = foot_rot.shape[1]
+            foot_z_axis_local = torch.zeros(num_envs, num_frames, num_feet, 3, device=foot_rot.device, dtype=foot_rot.dtype)
+        foot_z_axis_local[..., 2] = 1.0
+        
+        # Rotate foot z-axis to world frame using quaternion rotation
+        foot_z_axis_world = torch_util.quat_rotate(foot_rot, foot_z_axis_local)
+        
+        # Ground normal in world frame [0, 0, 1]
+        ground_normal = torch.zeros_like(foot_z_axis_world)
+        ground_normal[..., 2] = 1.0
+        
+        # Compute angle between foot z-axis and ground normal using dot product
+        # Normalize vectors
+        foot_z_axis_norm = torch.nn.functional.normalize(foot_z_axis_world, dim=-1)
+        ground_normal_norm = torch.nn.functional.normalize(ground_normal, dim=-1)
+        
+        # Dot product: cos(angle) = dot(normalized_vectors)
+        dot_product = torch.sum(foot_z_axis_norm * ground_normal_norm, dim=-1)
+        # Clamp to avoid numerical issues with acos
+        dot_product = torch.clamp(dot_product, min=-1.0, max=1.0)
+        
+        # Angle between vectors (0 when parallel to ground, pi when perpendicular)
+        angle = torch.acos(dot_product)
+        # Penalty: angle deviation from 0 (parallel to ground)
+        # Average across all feet, then across time dimension if present
+        foot_orient_err = torch.mean(angle * angle, dim=-1)
+        # If there's a time dimension, take the mean across it
+        if len(foot_orient_err.shape) > len(root_pos.shape):
+            foot_orient_err = torch.mean(foot_orient_err, dim=1)
+        
+        foot_orient_r = torch.exp(-foot_orient_scale * foot_orient_err)
+
     r = pose_w * pose_r \
         + vel_w * vel_r \
         + root_pose_w * root_pose_r \
         + root_vel_w * root_vel_r \
-        + key_pos_w * key_pos_r
+        + key_pos_w * key_pos_r \
+        + foot_orient_w * foot_orient_r
 
     return r
 
